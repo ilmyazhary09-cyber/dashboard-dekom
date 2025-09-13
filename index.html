@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Sekretariat Dewan Komisaris</title>
+  <!-- Minimal CSS, no framework -->
+  <style>
+    :root{
+      --emerald:#10b981; --emerald-50:#ecfdf5; --emerald-100:#d1fae5;
+      --amber:#f59e0b; --amber-50:#fffbeb; --amber-100:#fef3c7;
+      --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-500:#64748b; --slate-700:#334155; --slate-900:#0f172a;
+      --green-50:#f0fdf4; --green-100:#dcfce7;
+      --sky-100:#e0f2fe;
+      --rose-600:#e11d48; --amber-600:#d97706; --emerald-600:#059669;
+      --blue:#3b82f6; --gray:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,var(--slate-50),#fff,var(--emerald-50));color:#0f172a}
+    .container{padding:24px}
+    .topbar{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .title{font-size:36px;font-weight:900;background:linear-gradient(90deg,#065f46,#059669,#ca8a04);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0}
+    .subtitle{margin:6px 0 0;color:var(--slate-500)}
+    .btn{display:inline-flex;gap:8px;align-items:center;background:#059669;color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    .grid{display:grid;gap:16px}
+    @media(min-width:1200px){.grid-12{grid-template-columns:repeat(12,1fr)} .grid-3{grid-template-columns:repeat(3,1fr)} .span-12{grid-column:span 12} .span-8{grid-column:span 8} .span-4{grid-column:span 4}}
+    .card{border:1px solid var(--slate-200);border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card-h{padding:12px 16px;border-bottom:1px solid var(--slate-200);background:var(--slate-50);border-radius:16px 16px 0 0}
+    .card-t{margin:0;font-size:18px;font-weight:800;color:var(--slate-700)}
+    .card-c{padding:16px}
+    .flow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:12px;font-weight:700}
+    .pill{padding:6px 10px;border-radius:999px;display:inline-block}
+    .table-wrap{border:1px solid var(--slate-200);border-radius:14px;overflow:hidden}
+    .table-h{padding:10px 14px;border-bottom:1px solid var(--slate-200)}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    thead{position:sticky;top:0;background:var(--slate-100);z-index:2}
+    th,td{padding:10px;border-bottom:1px solid var(--slate-200);vertical-align:top}
+    tbody tr:hover{background:#f9fafb}
+    .muted{color:var(--slate-500)}
+    .kpi-card{padding:12px;border:1px solid var(--slate-200);border-radius:12px;background:linear-gradient(135deg,#f0fdf4,#fff)}
+    .bar{height:8px;background:var(--slate-200);border-radius:999px;overflow:hidden}
+    .bar > span{display:block;height:8px;border-radius:999px}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day{min-height:90px;border:1px solid var(--slate-200);border-radius:10px;padding:8px;position:relative}
+    .date{position:absolute;top:6px;right:8px;font-size:11px;color:var(--slate-500)}
+    .chip{font-size:11px;padding:4px 8px;border-radius:999px;color:#fff;display:inline-block;margin-top:24px}
+    .scroll{max-height:320px;overflow:auto}
+    @media print { .btn{display:none} body{background:#fff} .container{padding:0} .card{break-inside:avoid} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Dashboard Sekretariat Dewan Komisaris</h1>
+        <p class="subtitle">Monitoring Surat • KPI Semester II • Keuangan & Profil Bisnis • Agenda</p>
+      </div>
+      <button class="btn" onclick="window.print()">🖨️ Export PDF</button>
+    </div>
+
+    <div class="grid grid-12">
+      <!-- MONITORING SURAT (full width) -->
+      <div class="span-12 card">
+        <div class="card-h">
+          <h2 class="card-t">Monitoring Surat Dewan Komisaris</h2>
+          <div class="flow">
+            <span class="pill" style="background:var(--emerald-100);color:#065f46">1. Surat Masuk</span> ➜
+            <span class="pill" style="background:var(--sky-100);color:#075985">2. Disposisi Komut</span> ➜
+            <span class="pill" style="background:var(--amber-100);color:#92400e">3. Telaah Komite (Memo/ND)</span> ➜
+            <span class="pill" style="background:var(--green-100);color:#166534">4. Surat Keluar</span>
+          </div>
+          <p class="muted" style="margin-top:6px">Alur: Masuk → Disposisi → Telaah (Memo/ND) → Keluar.</p>
+        </div>
+        <div class="card-c">
+          <!-- Ringkasan -->
+          <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+            <div class="kpi-card" id="ringkasan-masuk"><div class="muted">Masuk Bulan Ini</div><div style="font-weight:800;font-size:22px">—</div></div>
+            <div class="kpi-card" id="ringkasan-keluar"><div class="muted">Keluar Bulan Ini</div><div style="font-weight:800;font-size:22px">—</div></div>
+            <div class="kpi-card" id="ringkasan-pending"><div class="muted">Pending</div><div style="font-weight:800;font-size:22px">—</div></div>
+            <div class="kpi-card" id="ringkasan-komite"><div class="muted">Komite Terlibat</div><div style="font-weight:800;font-size:22px">—</div></div>
+          </div>
+
+          <!-- Surat Masuk -->
+          <div class="table-wrap" style="margin-bottom:12px">
+            <div class="table-h" style="background:var(--green-50)"><strong>Surat Masuk & Disposisi</strong></div>
+            <div class="scroll"><table id="tbl-surat-masuk"></table></div>
+          </div>
+          <!-- Nota Dinas -->
+          <div class="table-wrap" style="margin-bottom:12px">
+            <div class="table-h" style="background:var(--amber-50)"><strong>Nota Dinas / Memorandum Komite (Hasil Telaah)</strong></div>
+            <div class="scroll"><table id="tbl-nota-dinas"></table></div>
+          </div>
+          <!-- Surat Keluar -->
+          <div class="table-wrap">
+            <div class="table-h" style="background:var(--green-50)"><strong>Surat Keluar</strong></div>
+            <div class="scroll"><table id="tbl-surat-keluar"></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="span-4 card">
+        <div class="card-h"><h2 class="card-t">KPI Dewan Komisaris — Semester II</h2></div>
+        <div class="card-c">
+          <div id="kpi-bobot"></div>
+          <div id="kpi-list" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- Tren Keuangan -->
+      <div class="span-8 card">
+        <div class="card-h"><h2 class="card-t">Tren Keuangan (Laba, Aset, NPL, ROE)</h2></div>
+        <div class="card-c">
+          <div id="fin-line" style="width:100%;height:260px"></div>
+          <div class="legend" id="fin-legend"></div>
+        </div>
+      </div>
+
+      <!-- Profil Bisnis -->
+      <div class="span-4 card">
+        <div class="card-h"><h2 class="card-t">Profil Bisnis (% Kontribusi)</h2></div>
+        <div class="card-c"><div id="bisnis-donut"></div></div>
+      </div>
+
+      <!-- Kalender -->
+      <div class="span-12 card">
+        <div class="card-h"><h2 class="card-t">Kalender Dewan (contoh bulan)</h2></div>
+        <div class="card-c">
+          <div class="calendar" id="calendar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== GANTI URL CSV di sini (Publish to web → CSV) ======
+    const URL_SM  = "PASTE_URL_CSV_Surat_Masuk";
+    const URL_ND  = "PASTE_URL_CSV_Nota_Dinas";
+    const URL_SK  = "PASTE_URL_CSV_Surat_Keluar";
+    const URL_KPI = "PASTE_URL_CSV_KPI_Perspektif_S2";
+    const URL_FIN = "PASTE_URL_CSV_Finance_S2";
+    const URL_PRO = "PASTE_URL_CSV_Profil_Bisnis";
+
+    // ====== Utility CSV → JSON (sederhana; gunakan PapaParse CDN jika data kompleks) ======
+    async function getCSV(url){
+      const res = await fetch(url); const text = await res.text();
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const hdr = (lines.shift()||"").split(",").map(s=>s.trim());
+      return lines.map(l=>{
+        const cols = l.split(","); const obj={};
+        hdr.forEach((h,i)=> obj[h] = (cols[i]||"").trim());
+        return obj;
+      });
+    }
+
+    function setText(id, value){ const el = document.getElementById(id); if(el) el.querySelector("div:last-child").textContent = value; }
+
+    function renderTable(elId, data, columns, headers){
+      const el = document.getElementById(elId);
+      if(!el) return;
+      const thead = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>`;
+      const tbody = `<tbody>${data.map(r=>`<tr>${columns.map(c=>`<td>${r[c]||""}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      el.innerHTML = thead + tbody;
+    }
+
+    function donut(el, items, size=220, inner=70, outer=100, title=""){
+      const total = items.reduce((a,b)=> a + (+b.value||0), 0) || 1;
+      let start = -Math.PI/2; const cx=size/2, cy=size/2;
+      const palette = ["#10B981","#3B82F6","#F59E0B","#6B7280","#34D399","#EF4444"];
+      function polar(r,a){return [cx + r*Math.cos(a), cy + r*Math.sin(a)]}
+      function arc(r,a0,a1){ const [x1,y1]=polar(r,a1); const large=((a1-a0)%(Math.PI*2)>Math.PI)?1:0; return `A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;}
+      const paths = items.map((it,i)=>{
+        const angle = (it.value/total)*Math.PI*2; const a0=start, a1=start+angle; start=a1;
+        const [x0o,y0o]=polar(outer,a0); const [x1i,y1i]=polar(inner,a1); const [x0i,y0i]=polar(inner,a0);
+        const d = `M ${x0o} ${y0o} ${arc(outer,a0,a1)} L ${x1i} ${y1i} ${arc(inner,a1,a0).replace(" 1 "," 0 ").replace(" 0 "," 0 ")} Z`;
+        return `<path d="${d}" fill="${it.color||palette[i%palette.length]}" stroke="#fff" stroke-width="1"></path>`;
+      }).join("");
+      const legend = items.map((it,i)=>`<div class="muted"><span class="dot" style="background:${it.color||palette[i%palette.length]}"></span> ${it.label} • ${it.value}</div>`).join("");
+      document.getElementById(el).innerHTML =
+        `<div style="display:flex;gap:16px;align-items:center;">
+           <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+             <circle cx="${cx}" cy="${cy}" r="${outer}" fill="#fff"></circle>
+             <circle cx="${cx}" cy="${cy}" r="${inner}" fill="#fff"></circle>
+             ${paths}
+             <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" style="fill:#334155;font-weight:800;font-size:14px">${title}</text>
+           </svg>
+           <div class="legend">${legend}</div>
+         </div>`;
+    }
+
+    function lineChart(el, rows, series){
+      // rows: [{x, s1, s2, ...}]
+      const W=780,H=240, m={t:20,r:20,b:28,l:40};
+      const iw=W-m.l-m.r, ih=H-m.t-m.b;
+      const xs = rows.map(r=>r.x);
+      const flat = series.flatMap(s=> rows.map(r=> +r[s.key]));
+      const ymin = Math.min(...flat), ymax = Math.max(...flat);
+      const xStep = iw / Math.max(1, xs.length-1);
+      const x = i => m.l + i*xStep;
+      const y = v => m.t + (ih - ( (v - ymin)/(ymax - ymin || 1) )*ih);
+      const grid = Array.from({length:5}).map((_,i)=> `<line x1="${m.l}" y1="${m.t+i*(ih/4)}" x2="${m.l+iw}" y2="${m.t+i*(ih/4)}" stroke="#e5e7eb" stroke-dasharray="4 4"/>`).join("");
+      const paths = series.map((s,si)=>{
+        const d = rows.map((r,i)=> `${i?'L':'M'} ${x(i)} ${y(+r[s.key])}`).join(" ");
+        const dots = rows.map((r,i)=> `<circle cx="${x(i)}" cy="${y(+r[s.key])}" r="3" fill="${s.color}"></circle>`).join("");
+        return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5"></path>${dots}`;
+      }).join("");
+      const xlabels = xs.map((v,i)=> `<text x="${x(i)}" y="${m.t+ih+18}" text-anchor="middle" style="fill:#64748b;font-size:12px">${v}</text>`).join("");
+      document.getElementById(el).innerHTML =
+        `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}">
+           ${grid}
+           ${paths}
+           ${xlabels}
+         </svg>`;
+    }
+
+    // Kalender dummy (boleh diganti API Calendar internal nanti)
+    function renderCalendar(el){
+      const days = Array.from({length:30},(_,i)=>i+1);
+      const events = {2:[{t:"Rapat Komite Audit",time:"09:00",c:"var(--amber-600)"}], 8:[{t:"Rapat Pleno DK",time:"10:00",c:"var(--emerald-600)"}],14:[{t:"Kunjungan Kerja",time:"13:00",c:"#0369a1"}],22:[{t:"Rapat Komite Risiko",time:"09:30",c:"var(--amber-600)"}]};
+      const header = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"].map(d=>`<div class="muted" style="text-align:center;font-weight:700">${d}</div>`).join("");
+      const offset = `<div></div><div></div>`; // contoh offset 2 hari
+      const cells = days.map(d=>{
+        const ev = (events[d]||[]).map(e=>`<div class="chip" style="background:${e.c}">${e.time} • ${e.t}</div>`).join("");
+        return `<div class="day"><span class="date">${d}</span>${ev}</div>`;
+      }).join("");
+      document.getElementById(el).innerHTML = header + offset + cells;
+    }
+
+    // ====== LOAD & RENDER ======
+    (async function init(){
+      try{
+        // Load semua CSV paralel
+        const [sm, nd, sk, kpi, fin, pro] = await Promise.all([
+          getCSV(URL_SM), getCSV(URL_ND), getCSV(URL_SK),
+          getCSV(URL_KPI), getCSV(URL_FIN), getCSV(URL_PRO)
+        ]);
+
+        // Ringkasan sederhana
+        setText("ringkasan-masuk", sm.length);
+        setText("ringkasan-keluar", sk.length);
+        setText("ringkasan-pending", sm.filter(x=> (x["Status(Pending/Proses/Selesai)"]||"").toLowerCase()==="pending").length);
+        // Komite terlibat: unik dari DisposisiKomut
+        setText("ringkasan-komite", new Set(sm.map(x=> x["DisposisiKomut"]||"")).size);
+
+        // Monitoring Tables
+        renderTable("tbl-surat-masuk", sm,
+          ["NoSurat","Tanggal(DD-MM-YYYY)","Pengirim","Perihal","DisposisiKomut","Status(Pending/Proses/Selesai)","SLA(Hari)"],
+          ["No Surat","Tanggal","Pengirim","Perihal","Disposisi Komut","Status","SLA"]
+        );
+        renderTable("tbl-nota-dinas", nd,
+          ["NoMemo","Komite","NoSuratTerkait","Tanggal(DD-MM-YYYY)","Status(Final/Draft/Belum Ada)","Ringkasan"],
+          ["No Memo/ND","Komite","Terkait No Surat Masuk","Tanggal","Status Memo","Ringkasan"]
+        );
+        renderTable("tbl-surat-keluar", sk,
+          ["NoSurat","Tanggal(DD-MM-YYYY)","Penerima","Perihal","Status(Pending/Proses/Selesai)","SLA(Hari)"],
+          ["No Surat","Tanggal","Penerima","Perihal","Status","SLA"]
+        );
+
+        // KPI
+        const kpiData = kpi.map(r=>({label:r["Perspektif"], value:+r["Bobot_%"]||0}));
+        donut("kpi-bobot", kpiData, 220, 70, 100, "Komposisi Bobot");
+        const list = kpi.map((r,i)=>{
+          const cap = +r["Capaian_S2_%"]||0;
+          const color = ["#10B981","#3B82F6","#F59E0B","#6B7280","#34D399","#EF4444"][i%6];
+          return `<div class="kpi-card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-weight:600">${r["Perspektif"]} <span class="muted">• Bobot ${r["Bobot_%"]}%</span></div>
+                <span class="pill" style="background:${cap>=70?'#dcfce7':cap>=50?'#fef3c7':'#ffe4e6'};color:${cap>=70?'#065f46':cap>=50?'#92400e':'#9f1239'}">${r["Status"]||""}</span>
+              </div>
+              <div class="bar" style="margin-top:6px"><span style="width:${cap}%;background:${color}"></span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:4px"><span class="muted">Capaian Semester II</span><strong>${cap}%</strong></div>
+            </div>`;
+        }).join("");
+        document.getElementById("kpi-list").innerHTML = list;
+
+        // Finance line
+        const rows = fin.map(r=>({x:r["Periode(YYYY-MM)"], laba:+r["Laba_Bersih_T"], aset:+r["Aset_T"], npl:+r["NPL_%"], roe:+r["ROE_%"]}));
+        lineChart("fin-line", rows, [
+          {key:"laba", name:"Laba Bersih (T)", color:"#10B981"},
+          {key:"aset", name:"Aset (T)", color:"#3B82F6"},
+          {key:"npl",  name:"NPL (%)", color:"#F59E0B"},
+          {key:"roe",  name:"ROE (%)", color:"#6B7280"},
+        ]);
+        document.getElementById("fin-legend").innerHTML = `
+          <div><span class="dot" style="background:#10B981"></span> Laba Bersih (T)</div>
+          <div><span class="dot" style="background:#3B82F6"></span> Aset (T)</div>
+          <div><span class="dot" style="background:#F59E0B"></span> NPL (%)</div>
+          <div><span class="dot" style="background:#6B7280"></span> ROE (%)</div>`;
+
+        // Profil Bisnis donut
+        const bisnis = pro.map(r=>({label:r["Produk"], value:+r["Kontribusi_%"]}));
+        donut("bisnis-donut", bisnis, 220, 70, 100, "Produk");
+
+        // Kalender
+        renderCalendar("calendar");
+      }catch(e){
+        console.error(e);
+        alert("Gagal memuat data. Pastikan URL CSV sudah benar (Publish to web). Anda juga bisa mulai dengan CSV lokal.");
+      }
+    })();
+  </script>
+</body>
+</html>
